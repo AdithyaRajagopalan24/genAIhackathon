@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Buddy</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            height: 100vh;
+        }
+
+        .left-panel {
+            width: 30%;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+        }
+
+        .left-panel h2 {
+            margin-top: 0;
+        }
+
+        .right-panel {
+            width: 70%;
+            padding: 20px;
+            background: #fff;
+            color: #000;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        #output {
+            margin-bottom: 20px;
+        }
+
+        #tile-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tile {
+            background: #f9f9f9;
+            color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+            flex: 1 1 200px;
+            max-width: 300px;
+            text-align: center;
+            margin: 10px;
+            font-size: 16px;
+            font-family: 'Arial', sans-serif;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .tile:hover {
+            transform: scale(1.05);
+        }
+
+        .tile img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        button {
+            background-color: #2575fc;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <h2>News Buddy</h2>
+        <div class="form-group">
+            <h2>Content</h2>
+            <label for="content-input">What news are you looking for today?</label>
+            <textarea id="content-input" placeholder="Type your request here..." required></textarea>
+        </div>
+
+        <button id="submit-btn">Fetch News</button>
+
+        <div id="tone-format-section" class="hidden">
+            <div class="form-group">
+		<h2>	</h2>
+                <h2>Tone</h2>
+                <textarea id="tone-input" placeholder="E.g., Formal, Casual, etc."></textarea>
+            </div>
+
+            <div class="form-group">
+                <h2>Format</h2>
+                <label><input type="checkbox" value="text" id="format-text"> Text</label>
+                <label><input type="checkbox" value="meme" id="format-meme"> Meme</label>
+                <label><input type="checkbox" value="image" id="format-image"> Image</label>
+            </div>
+
+            <button id="submit-tone-format">Submit</button>
+        </div>
+    </div>
+
+    <div class="right-panel">
+	<h2>	</h2>
+        <h2>News</h2>
+	<h1>	</h1>
+	<h1>	</h1>
+        <div id="tile-container">News will be displayed here.</div>
+    </div>
+
+<script>
+    let selectedUrl = '';
+    let selectedTile = null; // Keep track of the currently selected tile
+
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+        const tileContainer = document.getElementById('tile-container');
+        tileContainer.innerHTML = 'Loading...';
+
+        try {
+            const response = await fetch('https://api.currentsapi.services/v1/latest-news?language=en&apiKey=KeJJ0DalWK1veAWdGkG9i6YYl2xh9kvwCfgeuOdr5YSG4Z39'); // Replace with actual API endpoint
+            const data = await response.json();
+
+            tileContainer.innerHTML = '';
+
+            if (data.status === 'ok' && Array.isArray(data.news)) {
+                data.news.forEach(item => {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.innerHTML = `
+                        <h3>${item.title}</h3>
+                        <p>${item.description}</p>
+                        ${item.image && item.image !== 'None' ? `<img src="${item.image}" alt="News image">` : ''}
+                    `;
+                    
+                    // Add click event to toggle the selection
+                    tile.addEventListener('click', () => {
+                        if (selectedTile) {
+                            selectedTile.classList.remove('selected'); // Deselect the previously selected tile
+                        }
+                        tile.classList.add('selected'); // Mark the new tile as selected
+                        selectedTile = tile;
+                        selectedUrl = item.url;
+                        document.getElementById('tone-format-section').classList.remove('hidden');
+                    });
+
+                    tileContainer.appendChild(tile);
+                });
+            } else {
+                tileContainer.innerHTML = 'No news found.';
+            }
+        } catch (error) {
+            console.error('Error fetching news:', error);
+            tileContainer.innerHTML = 'Error fetching news. Please try again later.';
+        }
+    });
+
+    document.getElementById('submit-tone-format').addEventListener('click', async () => {
+        const tone = document.getElementById('tone-input').value;
+        const formats = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
+
+        const requestData = {
+            url: selectedUrl,
+            tone,
+            formats
+        };
+
+        try {
+            const response = await fetch('https://example-llm-api.com/process', { // Replace with actual API endpoint
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestData)
+            });
+
+            const result = await response.json();
+            console.log('LLM Response:', result);
+        } catch (error) {
+            console.error('Error calling LLM API:', error);
+        }
+    });
+</script>
+</body>
+</html>
+
