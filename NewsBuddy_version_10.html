@@ -124,7 +124,7 @@
                 <h2></h2>
 		<label for="country">Select your country:</label>
 		<select name="country" id="country">
-            		<option value="India">India</option>
+            <option value="India">India</option>
 			<option value="United States">United States</option>
 			<option value="Taiwan">Taiwan</option>
 			<option value="German">German</option>
@@ -156,7 +156,7 @@
                 <h2></h2>
 		<label for="Category">Choose the category of news:</label>
 		<select name="Category" id="Category">
-            		<option value="General">General</option>
+            <option value="General">General</option>
 			<option value="Technology">Technology</option>
 			<option value="Lifestyle">Lifestyle</option>
 			<option value="Business">Business</option>
@@ -184,7 +184,7 @@
                 <h2></h2>
 		<label for="Languages">Choose your preferred language:</label>
 		<select name="Languages" id="Languages">
-            		<option value="English">English</option>
+            <option value="English">English</option>
 			<option value="Arabic">Arabic</option>
 			<option value="Chinese">Chinese</option>
 			<option value="Dutch">Dutch</option>
@@ -266,7 +266,7 @@
     var selectedUrl = '';
     let selectedTile = null; // Keep track of the currently selected tile
     const GROQ_API = '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';
-    const OPEN_API = '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';
+    const OPEN_API = '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';
     document.getElementById('submit-btn').addEventListener('click', async () => {
         const tileContainer = document.getElementById('tile-container');
         const keyword = document.getElementById('content-input').value;
@@ -376,7 +376,7 @@
             tone,
             formats
         };
-        if (formats === 'text'){
+        if (formats[0] === 'text'){
             const promptMessage = [{"role":"user"},
             {"content": `Generate a text social media post based on this news article: ${selectedTile.url} Tone: ${tone} Format: ${formats}`}];
             const params_text = {
